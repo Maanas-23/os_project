@@ -5,3 +5,5 @@
 # Binaries
 build/*
 
+# Data
+*.csv

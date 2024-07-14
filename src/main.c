@@ -1,5 +1,6 @@
 #include "fifo.h"
 #include "lru.h"
+#include "optimal.h"
 #include "utils.h"
 
 #include <stdio.h>
@@ -20,37 +21,36 @@ typedef struct {
 } ThreadParams;
 
 void run_tests(FILE *f, int *frames, int *ranges, int *lengths) {
-    fprintf(f, "Frames, Page Range, Page String Length, FIFO Page Faults, LRU Page Faults\n");
+    fprintf(f, "Frames, Page Range, Page String Length, FIFO Page Faults, LRU Page Faults, Optimal Page Faults\n");
 
     for (int j = 0; j < RANGES; ++j) {
         for (int k = 0; k < LENGTHS; ++k) {
             int fifo_page_faults[FRAMES] = {};
             int lru_page_faults[FRAMES] = {};
+            int optimal_page_faults[FRAMES] = {};
 
             for (int _ = 0; _ < NUM_TESTS; ++_) {
                 int *page_string = generate_page_string(lengths[k], ranges[j]);
 
                 for (int i = 0; i < FRAMES; ++i) {
-                    int page_faults = simulate_fifo(frames[i], page_string, lengths[k]);
-                    fifo_page_faults[i] += page_faults;
-
-                    page_faults = simulate_lru(frames[i], page_string, lengths[k]);
-                    lru_page_faults[i] += page_faults;
+                    fifo_page_faults[i] += simulate_fifo(frames[i], page_string, lengths[k]);
+                    lru_page_faults[i] += simulate_lru(frames[i], page_string, lengths[k]);
+                    optimal_page_faults[i] += simulate_optimal(frames[i], page_string, lengths[k], ranges[j]);
                 }
 
                 free(page_string);
             }
 
-
             for (int i = 0; i < FRAMES; ++i) {
                 double avg_fifo_page_faults = (double) fifo_page_faults[i] / NUM_TESTS;
                 double avg_lru_page_faults = (double) lru_page_faults[i] / NUM_TESTS;
+                double avg_optimal_page_faults = (double) optimal_page_faults[i] / NUM_TESTS;
 
                 fprintf(
                     f,
-                    "%d, %d, %d, %lf, %lf\n",
+                    "%d, %d, %d, %lf, %lf, %lf\n",
                     frames[i], ranges[j], lengths[k],
-                    avg_fifo_page_faults, avg_lru_page_faults
+                    avg_fifo_page_faults, avg_lru_page_faults, avg_optimal_page_faults
                 );
             }
         }
@@ -64,30 +64,30 @@ void *run_thread(void *x) {
 
     int fifo_page_faults[FRAMES] = {};
     int lru_page_faults[FRAMES] = {};
+    int optimal_page_faults[FRAMES] = {};
 
     for (int _ = 0; _ < NUM_TESTS; ++_) {
         int *page_string = generate_page_string(params->length, params->range);
 
         for (int i = 0; i < FRAMES; ++i) {
-            int page_faults = simulate_fifo(params->frames[i], page_string, params->length);
-            fifo_page_faults[i] += page_faults;
-
-            page_faults = simulate_lru(params->frames[i], page_string, params->length);
-            lru_page_faults[i] += page_faults;
+            fifo_page_faults[i] += simulate_fifo(params->frames[i], page_string, params->length);
+            lru_page_faults[i] += simulate_lru(params->frames[i], page_string, params->length);
+            optimal_page_faults[i] += simulate_optimal(params->frames[i], page_string, params->length, params->range);
         }
 
         free(page_string);
     }
 
     for (int i = 0; i < FRAMES; ++i) {
-        double avg_fifo_page_faults = (double)fifo_page_faults[i] / NUM_TESTS;
-        double avg_lru_page_faults = (double)lru_page_faults[i] / NUM_TESTS;
+        double avg_fifo_page_faults = (double) fifo_page_faults[i] / NUM_TESTS;
+        double avg_lru_page_faults = (double) lru_page_faults[i] / NUM_TESTS;
+        double avg_optimal_page_faults = (double) optimal_page_faults[i] / NUM_TESTS;
 
         fprintf(
             f,
-            "%d, %d, %d, %lf, %lf\n",
+            "%d, %d, %d, %lf, %lf, %lf\n",
             params->frames[i], params->range, params->length,
-            avg_fifo_page_faults, avg_lru_page_faults
+            avg_fifo_page_faults, avg_lru_page_faults, avg_optimal_page_faults
         );
     }
 
@@ -95,7 +95,7 @@ void *run_thread(void *x) {
 }
 
 void run_tests_multi(FILE *f, int *frames, int *ranges, int *lengths) {
-    fprintf(f, "Frames, Page Range, Page String Length, FIFO Page Faults, LRU Page Faults\n");
+    fprintf(f, "Frames, Page Range, Page String Length, FIFO Page Faults, LRU Page Faults, Optimal Page Faults\n");
 
     pthread_t threads[RANGES * LENGTHS]; // Multithreading for different page ranges and string lengths
     ThreadParams params[RANGES * LENGTHS];

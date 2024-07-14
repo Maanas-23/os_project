@@ -10,7 +10,7 @@ int *generate_page_string(int length, int page_range) {
     srand(time(NULL) + cnt++);
 
     for (int i = 0; i < length; ++i) {
-        page_string[i] = rand() % (page_range + 1);
+        page_string[i] = rand() % page_range;
     }
 
     return page_string;
