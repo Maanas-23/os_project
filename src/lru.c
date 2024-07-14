@@ -1,11 +1,11 @@
 #include "lru.h"
 
+#include <stdbool.h>
+
 typedef struct {
     int page_number;
     int time;
 } frame;
-
-typedef enum {false, true} bool;
 
 bool find_lru(frame *arr, int frames, int page_number, int time) {
     for (int i = 0; i < frames; ++i) {
@@ -31,9 +31,9 @@ int simulate_lru(int frames, int *pages, int n) {
             ++page_faults;
 
             int lru = 0;
-            for (int i = 1; i < frames; ++i) {
-                if (arr[i].time < arr[lru].time) {
-                    lru = i;
+            for (int j = 1; j < frames; ++j) {
+                if (arr[j].time < arr[lru].time) {
+                    lru = j;
                 }
             }
 
