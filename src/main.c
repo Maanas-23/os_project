@@ -6,7 +6,7 @@
 #include <time.h>
 #include <stdlib.h>
 
-#define NUM_TESTS 300
+#define NUM_TESTS 30
 
 void run_tests(FILE *f, int *frames, int *ranges, int *lengths) {
     fprintf(f, "Frames, Page Range, Page String Length, FIFO Page Faults, LRU Page Faults\n");
