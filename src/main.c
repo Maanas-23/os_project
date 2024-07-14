@@ -21,7 +21,7 @@ typedef struct {
 } ThreadParams;
 
 void run_tests(FILE *f, int *frames, int *ranges, int *lengths) {
-    fprintf(f, "Frames, Page Range, Page String Length, FIFO Page Faults, LRU Page Faults, Optimal Page Faults\n");
+    fprintf(f, "Frames,Page Range,Page String Length,FIFO Page Faults,LRU Page Faults,Optimal Page Faults\n");
 
     for (int j = 0; j < RANGES; ++j) {
         for (int k = 0; k < LENGTHS; ++k) {
@@ -48,7 +48,7 @@ void run_tests(FILE *f, int *frames, int *ranges, int *lengths) {
 
                 fprintf(
                     f,
-                    "%d, %d, %d, %lf, %lf, %lf\n",
+                    "%d,%d,%d,%lf,%lf,%lf\n",
                     frames[i], ranges[j], lengths[k],
                     avg_fifo_page_faults, avg_lru_page_faults, avg_optimal_page_faults
                 );
@@ -85,7 +85,7 @@ void *run_thread(void *x) {
 
         fprintf(
             f,
-            "%d, %d, %d, %lf, %lf, %lf\n",
+            "%d,%d,%d,%lf,%lf,%lf\n",
             params->frames[i], params->range, params->length,
             avg_fifo_page_faults, avg_lru_page_faults, avg_optimal_page_faults
         );
@@ -95,7 +95,7 @@ void *run_thread(void *x) {
 }
 
 void run_tests_multi(FILE *f, int *frames, int *ranges, int *lengths) {
-    fprintf(f, "Frames, Page Range, Page String Length, FIFO Page Faults, LRU Page Faults, Optimal Page Faults\n");
+    fprintf(f, "Frames,Page Range,Page String Length,FIFO Page Faults,LRU Page Faults,Optimal Page Faults\n");
 
     pthread_t threads[RANGES * LENGTHS]; // Multithreading for different page ranges and string lengths
     ThreadParams params[RANGES * LENGTHS];
